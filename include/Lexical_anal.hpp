@@ -1,0 +1,4 @@
+#ifndef LEXICAL_ANAL_HEADER
+#define LEXICAL_ANAL_HEADER
+
+#endif

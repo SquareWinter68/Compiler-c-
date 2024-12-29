@@ -1,0 +1,22 @@
+#ifndef TOKENS_HEADER
+#define TOKENS_HEADER 
+enum class TOKENS{
+    // keywords
+    WHILE, FOR, IF, ELSE, RETURN, BREAK, DO,
+    // types
+    INT, FLOAT, CHAR, STRING, BOOL,
+    // Literals
+    INTEGRAL_LITERAL, DECIMAL_LITERAL, STRING_LITERAL, TRUE, FALSE, 
+    // OPERATORS
+    ADD, SUBTRACT, MULTIPLY, DIVIDE, 
+    // Relational operators
+    EQUAL, LESS_THAN, MORE_THAN, LESS_THEN_EQUAL, MORE_THAN_EQUAL, NOT_EQUAL,
+    // Logical operators
+    AND, OR, // not is a special case in the unary ones
+    // Unary operators
+    UNARY_MINUS, LOGICAL_NOT,
+    // LANGUAGE SYMBOLS
+    ASSIGN, PAREN_OPEN, PAREN_CLOSED, BRACKET_OPEN, BRACKET_CLOSED, SQUARE_BRACKET_OPEN, SQUARE_BRACKET_CLOSED, DOT, SEMICOLON,
+
+};
+#endif
