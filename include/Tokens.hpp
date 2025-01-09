@@ -31,7 +31,7 @@ const std::unordered_map<TOKENS, const std::string> token_string_map{
     {TOKENS::ADD, "+"}, {TOKENS::SUBTRACT, "-"}, {TOKENS::MULTIPLY, "*"}, {TOKENS::DIVIDE, "/"},
     {TOKENS::EQUAL, "=="}, {TOKENS::LESS_THAN, "<"}, {TOKENS::GREATER_THAN, ">"}, {TOKENS::LESS_THEN_EQUAL, "<="}, {TOKENS::GREATER_THAN_EQUAL, ">="}, {TOKENS::NOT_EQUAL, "!="},
     {TOKENS::AND, "&&"}, {TOKENS::OR, "||"},
-    {TOKENS::UNARY_MINUS, "-(unray)"}, {TOKENS::LOGICAL_NOT, "!"},
+    {TOKENS::UNARY_MINUS, "-"}, {TOKENS::LOGICAL_NOT, "!"},
     {TOKENS::ASSIGN, "="}, {TOKENS::PAREN_OPEN, "("}, {TOKENS::PAREN_CLOSED, ")"}, {TOKENS::BRACKET_OPEN, "{"}, {TOKENS::BRACKET_CLOSED, "}"}, {TOKENS::SQUARE_BRACKET_OPEN, "["}, {TOKENS::SQUARE_BRACKET_CLOSED, "]"}, {TOKENS::DOT, "."}, {TOKENS::SEMICOLON, ";"},
     {TOKENS::IDENTIFIER, "ID"}, {TOKENS::COMMENT, "//(comment)"}, {TOKENS::EOF_TOK, "End_of_file"}
 };

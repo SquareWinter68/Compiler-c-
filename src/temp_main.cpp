@@ -39,7 +39,7 @@ int main(){
     //auto test = plus.generate();
     plus.emit_lbael(plus.new_label());
     auto test = complex.generate();
-    test->emit(test->to_string());
+    Node::emit(test->to_string());
     //cout << "Huh, let's see " << test->to_string() << '\n';
 
     // Test expressions with Identifiers
@@ -48,7 +48,7 @@ int main(){
     Arithmetic complex2{TOKENS::SUBTRACT, factory<Arithmetic>(times), factory<Arithmetic>(divide)};
 
     auto test2 = complex2.generate();
-    test2->emit(test2->to_string());
+    Node::emit(test2->to_string());
 
     // Test expressions with unary operators
 
@@ -56,6 +56,17 @@ int main(){
     Arithmetic complex3{TOKENS::DIVIDE, factory<Arithmetic>(times), factory<Unary_operations>(unary_minus)};
 
     auto test3 = complex3.generate();
-    test3->emit(test3->to_string());
+    Node::emit(test3->to_string());
 
+    // test expressions with jumping code
+
+    And log_and{TOKENS::AND, factory<Constant<bool>>(Constant<bool>(true)), factory<Constant<bool>>(Constant<bool>(true))};
+
+    cout << "\n\n\n";
+    auto test_4 = log_and.generate();
+    //Node::emit(test_4->to_string());
+
+    Relational rel{TOKENS::GREATER_THAN, factory<Constant<int>>(42), factory<Constant<int>>(11)};
+    auto test_5 = rel.generate();
+    //Node::emit(test_5->to_string());
 }
