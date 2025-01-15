@@ -1,10 +1,11 @@
 #ifndef UTILS_HEADER
 #define UTILS_HEADER
+#include "Lexical_anal.hpp"
 #include "Tokens.hpp"
 #include <algorithm>
-#include <iostream>
 #include <memory>
 #include <optional>
+#include <stdexcept>
 #include <string>
 #include <utility>
 #include <variant>
@@ -26,7 +27,7 @@ inline std::string apply_err_fmt(std::string opt){
     return before + opt + after;
 }
 
-using acceptable_types = std::variant<int, float, bool, unsigned, short, std::string>;
+using acceptable_types = std::variant<int, float, bool, unsigned, long, short, std::string>;
 template<typename T>
 concept Constant_types = requires(T arg){
     {arg} -> std::convertible_to<acceptable_types>;
@@ -71,6 +72,13 @@ class Array{
                 return "["s + std::to_string(size) + "]" + arr->to_string();
             }
         }
+        int get_basic_type(){
+            if (std::holds_alternative<Basic_type>(type)) return std::get<Basic_type>(type).second;
+            else{
+                auto arr = std::get<Array_type>(type);
+                return arr->get_basic_type();
+            }
+        }
 };
 
 inline bool is_numeric_type(Type p){
@@ -97,6 +105,11 @@ inline std::optional<Basic_type> is_bool(Type t1, Type t2){
     }
     return {};
 }
+inline bool is_bool(Type t1){
+    auto type = std::get_if<Basic_type>(&t1);
+    if (type && *type == types::BOOL) return true;
+    return false;
+}
 
 inline std::string type_string_repr(Type type){
     if (std::holds_alternative<Basic_type>(type)){
@@ -112,5 +125,18 @@ inline bool operator%(const Basic_type& needle, std::vector<Basic_type> haystack
     if(std::find(haystack.begin(), haystack.end(), needle) != haystack.end()) return true;
     return false;
 }
+inline bool operator%(const TOKENS& needle, std::vector<TOKENS> haystack){
+    if (std::find(haystack.begin(), haystack.end(), needle) != haystack.end()) return true;
+    else return false;
+}
 
+inline long get_type_width(const Type& type){
+    if (std::holds_alternative<Basic_type>(type)){
+        return std::get<Basic_type>(type).second;
+    }
+    else{
+        auto arr = std::get<Array_type>(type);
+        return arr->size * arr->get_basic_type();
+    }
+}
 #endif

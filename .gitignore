@@ -3,3 +3,5 @@ bin/
 src/variadic_template_test.cpp
 *.し++
 *.out
+gdb.text
+gdb.txt

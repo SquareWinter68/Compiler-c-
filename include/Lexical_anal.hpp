@@ -30,6 +30,11 @@ struct Word{
 inline bool operator==(const Word& lhs, const Word& rhs){
     return (lhs.lexeme == rhs.lexeme) && (lhs.token == rhs.token);
 }
+struct Word_equal{
+    bool operator()(const Word& lhs, const Word& rhs)const {
+        return true;//(lhs.lexeme == rhs.lexeme) && (lhs.token == rhs.token);
+    }
+};
 
 struct Number_integer{
     TOKENS token;

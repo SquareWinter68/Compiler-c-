@@ -60,7 +60,7 @@ class Lexer{
         int character{};
         Lexer(){
             // add keywords
-            add_to_seen_words({{TOKENS::TRUE, "true"}, {TOKENS::FALSE, "false"}, {TOKENS::WHILE, "while"}, {TOKENS::FOR, "for"}, {TOKENS::IF, "if"}, {TOKENS::ELSE, "else"}, {TOKENS::RETURN, "return"}, {TOKENS::DO, "do"}});
+            add_to_seen_words({{TOKENS::TRUE, "true"}, {TOKENS::FALSE, "false"}, {TOKENS::WHILE, "while"}, {TOKENS::FOR, "for"}, {TOKENS::IF, "if"}, {TOKENS::ELSE, "else"}, {TOKENS::RETURN, "return"}, {TOKENS::DO, "do"}, {TOKENS::BREAK, "break"}});
             // add types
             add_to_seen_words({{TOKENS::INT, "int"}, {TOKENS::FLOAT, "float"}, {TOKENS::CHAR, "char"}, {TOKENS::BOOL, "bool"}, {TOKENS::STRING, "string"}});
         }
