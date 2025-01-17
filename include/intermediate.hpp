@@ -4,9 +4,9 @@
 #include "Lexer.hpp"
 #include "Lexical_anal.hpp"
 #include "Tokens.hpp"
-#include "temp_inter.hpp"
 #include "utils.hpp"
 #include <concepts>
+#include <fstream>
 #include <functional>
 #include <memory>
 #include <optional>
@@ -17,9 +17,11 @@
 #include <utility>
 #include <variant>
 #include <iostream>
+#include <vector>
+#include "code_gen_structures.hpp"
 
 using std::cout;
-
+class Temporary;
 class Node{
     /* this class is the most generic version of node, and mainly contains stuff which all nodes share
     This includes emit_label which just emits another label, and emit, which emits code coresponding to 
@@ -30,8 +32,10 @@ class Node{
     public:
         Node() {}
         Node(const Lexer& lex): lexer_line{lex.line} {}
-        static void emit_lbael(long i) {cout << "L" << i << ":";}
-        static void emit(const std::string& str) {cout << "\t" << str << '\n';}
+        inline static std::vector<std::string> vector{};
+        inline static std::vector<std::shared_ptr<Temporary>> temps;
+        static void emit_label(long i) {vector.emplace_back("L" + std::to_string(i) + ":");cout << "L" << i << ":";}
+        static void emit(const std::string& str) {vector.emplace_back("\t" + str + '\n');cout << "\t" << str << '\n';}
         static long new_label(){return labels++;}
         void error(const std::string& err) {throw std::runtime_error{"Error near line " + std::to_string(lexer_line) + ": " + err + '\n'};}
 
@@ -132,7 +136,7 @@ class Temporary: public Expression{
     public:
         static inline long counter{1};
         long number;
-        Temporary(Type tp): Expression{tp} {number = counter++;}
+        Temporary(Type tp): Expression{tp} {number = counter++; temps.push_back(factory<Temporary>(*this));}
         std::string to_string() override{
             return "T" + std::to_string(number);    
         }
@@ -167,7 +171,7 @@ class Arithmetic: public Expression{
         ex_shptr reduce() override{
             ex_shptr expr = generate();
             Temporary temp{type};
-            Node::emit(type_string_repr(type) + " " + temp.to_string() + " = " + expr->to_string());
+            Node::emit(temp.to_string() + " = " + expr->to_string());
             return factory<Temporary>(temp);
         }
         
@@ -198,7 +202,7 @@ class Unary_operations: public Expression{
             ex_shptr reduce() override{
                 ex_shptr expr = generate();
                 Temporary temp{type};
-                emit(type_string_repr(type) + " " + temp.to_string() + " = " + expr->to_string());
+                emit(temp.to_string() + " = " + expr->to_string());
                 return factory<Temporary>(temp);
             }
             std::string to_string() override{
@@ -268,13 +272,13 @@ class Logical: public Expression{
             */
             long false_exit = Node::new_label(), after = Node::new_label();
             Temporary temp{type};
-            emit(type_string_repr(type) + ' ' + temp.to_string());
+            emit(temp.to_string());
             jumping(0, false_exit);
             emit(temp.to_string() + " = true");
             emit("goto L" + std::to_string(after));
-            Node::emit_lbael(false_exit);
+            Node::emit_label(false_exit);
             emit(temp.to_string() + " = false");
-            Node::emit_lbael(after);
+            Node::emit_label(after);
             return factory<Temporary>(temp);
         }
         std::string to_string() override{
@@ -307,7 +311,7 @@ class Or: public Logical{
             to signal the end of branching instructions.
             */
             rhs->jumping(true_exit, false_exit); 
-            if (true_exit == 0) Node::emit_lbael(true_exit_or_after);
+            if (true_exit == 0) Node::emit_label(true_exit_or_after);
         }
         ex_shptr reduce() override{
             return factory<Or>(*this);
@@ -329,7 +333,7 @@ class And: public Logical{
             lhs->jumping(0, false_exit_of_after);
             // as mentioned above this works both when false_exit is 0 and non-zero
             rhs->jumping(true_exit, false_exit);
-            if (false_exit == 0) Node::emit_lbael(false_exit_of_after);
+            if (false_exit == 0) Node::emit_label(false_exit_of_after);
         }
         ex_shptr reduce() override{
             return factory<And>(*this);
@@ -384,7 +388,7 @@ class Array_acess: public Expression{
         ex_shptr reduce() override{
             ex_shptr expr = generate();
             Temporary temp{type};
-            emit(type_string_repr(type) + " " + temp.to_string() + " = " + expr->to_string());
+            emit(temp.to_string() + " = " + expr->to_string());
             return factory<Temporary>(temp);
         }
         void jumping(long true_exit, long false_exit) override{
@@ -426,7 +430,7 @@ class If: public Statement{
             // if ture, fall through to statement, else jump to first insturction after statement
             test_expression->jumping(0, after_stmt);
             // start of statement
-            Node::emit_lbael(stmt_label);
+            Node::emit_label(stmt_label);
             statement->generate(stmt_label, after_stmt);
         }
 };
@@ -443,12 +447,12 @@ class Else: public Statement{
             long else_stmt_label = Node::new_label();
             // fall through on ture, jump to else on false
             test_expression->jumping(0, else_stmt_label);
-            Node::emit_lbael(if_stmt_label); if_stmt->generate(if_stmt_label, after_stmt);
+            Node::emit_label(if_stmt_label); if_stmt->generate(if_stmt_label, after_stmt);
             // since we at this point fell through to the we should jump to after, once the if has evaluated
             Node::emit("goto L" + std::to_string(after_stmt));
             
             // Code for else, starting with label for else statement
-            Node::emit_lbael(else_stmt_label); else_stmt->generate(else_stmt_label, after_stmt);
+            Node::emit_label(else_stmt_label); else_stmt->generate(else_stmt_label, after_stmt);
         }
 };
 
@@ -468,7 +472,7 @@ class While: public Statement{
             long statement_label = Node::new_label();
             // if loop fails, jump to end of statement, else go through statement
             test_expression->jumping(0, after_stmt);
-            Node::emit_lbael(statement_label);
+            Node::emit_label(statement_label);
             statement->generate(statement_label, begin_stmt);
             // loop, go back to top
             Node::emit("goto L" + std::to_string(begin_stmt));
@@ -487,7 +491,7 @@ class Do_while: public Statement{
             after = after_stmt;
             long expression_label = Node::new_label();
             statement->generate(begin_stmt, expression_label);
-            Node::emit_lbael(expression_label);
+            Node::emit_label(expression_label);
             // if false, fall through, else loop/ jump back to start
             test_expression->jumping(begin_stmt, 0);
         }
@@ -543,7 +547,7 @@ class Statements: public Statement{
             if (statement1 && statement2){
                 long label = Node::new_label();
                 statement1->generate(begin_stmt, label);
-                Node::emit_lbael(label);
+                Node::emit_label(label);
                 statement2->generate(label, after_stmt);
             }
             else if (statement1) statement1->generate(begin_stmt, after_stmt);
@@ -568,6 +572,7 @@ class Break: public Statement{
 class Scope{
     public:
         std::shared_ptr<Scope> parent;
+        std::vector<std::shared_ptr<Scope>> children;
         std::unordered_map<Word, Identifier, token_hash, Word_equal> lexeme_to_id;
         Scope(): parent{nullptr} {}
         Scope(std::shared_ptr<Scope> scope): parent{scope} {}
@@ -595,7 +600,26 @@ class Scope{
                 current = current->parent.get(); // Move to the parent scope
             }
             return {}; // Not found
-}
+        }
+        void printIdentifiers() {
+            // Print identifiers in the current scope
+            for (const auto& pair : lexeme_to_id) {
+                // Assuming Identifier has a way to be printed, e.g., an overloaded operator<<
+                std::cout << type_string_repr(pair.second.type) << " " <<  pair.second.lexeme  << '\n'; // Replace with actual printing logic
+            }   
+            // Recursively print identifiers of children
+            for (const auto& child : children) {
+                child->printIdentifiers();
+            }
+        }
+        void get_identifiers(std::vector<variable_positions>& out){
+            for (const auto& pair: lexeme_to_id){
+                out.push_back({pair.second.lexeme, pair.second.offset, get_type_width(pair.second.type)});
+            }
+            for (const auto& child: children){
+                child->get_identifiers(out);
+            }
+        }
 
 };
 

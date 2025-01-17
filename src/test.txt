@@ -1,0 +1,4 @@
+.section .data
+.global a
+.global tis_b
+.global boolean

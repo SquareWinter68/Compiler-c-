@@ -225,6 +225,8 @@ inline std::shared_ptr<Token> Lexer::scan(){
             tok = Basic_token(TOKENS::SUBTRACT); break;
         case '*':
             tok = Basic_token(TOKENS::MULTIPLY); break;
+        case ',':
+            tok = Basic_token(TOKENS::COMMA); break;
         case ';':
             tok = Basic_token(TOKENS::SEMICOLON); break;
         

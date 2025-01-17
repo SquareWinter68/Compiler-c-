@@ -1,8 +1,8 @@
-// #include "Lexer.hpp"
-// #include "Lexical_anal.hpp"
-// #include "Tokens.hpp"
+// //#include "Lexer.hpp"
+// //#include "Lexical_anal.hpp"
+// //#include "Tokens.hpp"
 // #include <algorithm>
-// #include <bits/getopt_core.h>
+// //#include <bits/getopt_core.h>
 // #include <concepts>
 // #include <cstdlib>
 // #include <filesystem>
@@ -85,13 +85,13 @@
 //     // cout << "the input files are: \n";
 //     // std::for_each(input_files.begin(), input_files.end(), [](std::string out){cout << out << '\n';});
 //     // exit(1);
-//     TOKENS return_value;
-//     auto printer = [&return_value](auto& T) {return_value = T.token;};
-//     if (!input_files.empty()){
-//         Lexer lex(input_files[0]);
-//         auto scaned = lex.scan();
-//         std::visit(printer, *scaned);
-//         cout << find_string_repr(return_value);
+//     // TOKENS return_value;
+//     // auto printer = [&return_value](auto& T) {return_value = T.token;};
+//     // if (!input_files.empty()){
+//     //     Lexer lex(input_files[0]);
+//     //     auto scaned = lex.scan();
+//     //     std::visit(printer, *scaned);
+//     //     cout << find_string_repr(return_value);
 
-//     }
+//     // }
 // }

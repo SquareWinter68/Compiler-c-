@@ -2,12 +2,15 @@
 #include "Lexical_anal.hpp"
 #include "Tokens.hpp"
 #include "intermediate.hpp"
-#include "temp_inter.hpp"
 #include "utils.hpp"
+#include <algorithm>
 #include <cassert>
+#include <fstream>
 #include <iostream>
 #include <memory>
+#include <utility>
 #include <variant>
+#include <vector>
 #include "parser.hpp"
 // int main(){
 //     using std::cout;
@@ -82,21 +85,46 @@
 // }
 
 int main(){
+    //std::ofstream out_file{"out.inter", std::ios::binary};
     auto lexer =  std::make_shared<Lexer>(Lexer("/home/squarewinter/temp/temp_compiler/tests/loops_test.し++"));
-        TOKENS return_value;
-        auto printer = [&return_value](auto& T) {return_value = T.token;};
-        std::shared_ptr<Token> scan;
-        cout << "Encountered the following tokens\n";
-        do {
-        scan = lexer->scan();
-        std::visit(printer, *scan);
-        cout << find_string_repr(return_value) << '\n';
-        }while (return_value != TOKENS::EOF_TOK);
+        // TOKENS return_value;
+        // auto printer = [&return_value](auto& T) {return_value = T.token;};
+        // std::shared_ptr<Token> scan;
+        // cout << "Encountered the following tokens\n";
+        // do {
+        // scan = lexer->scan();
+        // std::visit(printer, *scan);
+        // cout << find_string_repr(return_value) << '\n';
+        // }while (return_value != TOKENS::EOF_TOK);
     lexer = std::make_shared<Lexer>(Lexer("/home/squarewinter/temp/temp_compiler/tests/loops_test.し++"));
     auto var = program(lexer);
     auto begin = Statement::new_label(), after = Statement::new_label();
-    Statement::emit_lbael(begin); 
+    Statement::emit_label(begin); 
+    
     if (var) var->generate(begin, after); 
     else cout << "program contains zero statements\n";
-    Statement::emit_lbael(after);
+    Statement::emit_label(after);
+    auto vec = Node::vector;
+    auto printer_lambda = [](std::string t){cout << t;};
+    cout << "Did we successfully steal the vector from Node\n";
+    //std::for_each(vec.begin(), vec.end(), printer_lambda);
+    auto t = get_scope();
+    std::vector<variable_positions> vars;
+    t->get_identifiers(vars);
+    auto temps = Node::temps;
+    cout << "Printing variables\n";
+    auto var_printer = [](const variable_positions& v){cout << v.lexeme  << " starts at: " << v.offset << " bytes" << '\n';};
+    auto temp_printer = [](std::shared_ptr<Temporary> temp){cout << temp->to_string() << "\n";};
+    unsigned long long offset{};
+    for (auto var : vars) {
+        var.offset = offset;
+        offset += var.byte_width;
+    }
+    for(auto temp: temps){
+        vars.push_back(variable_positions{temp->to_string(), (long)offset, 0});
+        offset += get_type_width(temp->type);
+    }
+    std::for_each(vars.begin(), vars.end(), var_printer);
+    cout << "Printing temsp\n";
+    //std::for_each(test.begin(), test.end(), temp_printer);
 }

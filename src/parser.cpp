@@ -4,6 +4,7 @@
 #include "Tokens.hpp"
 #include "intermediate.hpp"
 #include "utils.hpp"
+#include <algorithm>
 #include <memory>
 #include <stdexcept>
 #include <string>
@@ -20,6 +21,7 @@ TOKENS get_TOKENS(){
     std::visit(check_value, *lookahead);
     return current;
 }
+std::shared_ptr<Scope> get_scope(){return top_level_scope;}
 bool is_comment(Token tok){
     if (std::holds_alternative<Basic_token>(tok) && std::get<Basic_token>(tok).token == TOKENS::COMMENT){
         return true;
@@ -61,13 +63,17 @@ ex_shptr array_access(Identifier id);
 st_shptr program(std::shared_ptr<Lexer> lx){
     lex = lx;
     move();
-    return block();
+    auto x = block();
+    top_level_scope->printIdentifiers();
+    return x;
 }
 
 st_shptr block(){
+    if (get_TOKENS() == TOKENS::EOF_TOK) return nullptr;
     match(TOKENS::BRACKET_OPEN);
     //Scope saved_scope = top_level_scope; top_level_scope = Scope()
     auto saved_scope = top_level_scope; top_level_scope = factory<Scope>(Scope(top_level_scope));
+    saved_scope->children.push_back(top_level_scope);
     declarations();
     st_shptr stmts = statements();
     match(TOKENS::BRACKET_CLOSED);
@@ -75,10 +81,25 @@ st_shptr block(){
     return stmts;
 }
 
+void function_declarations(){
+    while (get_TOKENS()%std::vector<TOKENS>{TOKENS::INT, TOKENS::FLOAT, TOKENS::CHAR, TOKENS::BOOL}){
+        Type tp = type(); auto temp_func = lookahead; match(TOKENS::IDENTIFIER);
+        match(TOKENS::PAREN_OPEN);
+        while (get_TOKENS()%std::vector<TOKENS>{TOKENS::INT, TOKENS::FLOAT, TOKENS::CHAR, TOKENS::BOOL}){
+            Type inner_tp = type(); auto temp_id = lookahead; match(TOKENS::IDENTIFIER);
+            match(TOKENS::COMMA);
+            Identifier id{variable_offset, inner_tp, std::get<Word>(*temp_id).lexeme};
+            top_level_scope->put(std::get<Word>(*temp_id), id);
+            variable_offset += get_type_width(inner_tp);
+        }
+    }
+}
+
 void declarations(){
     while (get_TOKENS()%std::vector<TOKENS>{TOKENS::INT, TOKENS::FLOAT, TOKENS::CHAR, TOKENS::BOOL}){
         // int a; float b; char c; bool d;  //Obviously there is no assigning in declarations, hence no call to match(TOKENS::EUQUAL) between identifier, and semicolon
-        Type tp = type(); auto temp_id = lookahead; match(TOKENS::IDENTIFIER); match(TOKENS::SEMICOLON);
+        Type tp = type(); auto temp_id = lookahead; match(TOKENS::IDENTIFIER); 
+        match(TOKENS::SEMICOLON);
         Identifier id{variable_offset, tp, std::get<Word>(*temp_id).lexeme};
         top_level_scope->put(std::get<Word>(*temp_id), id);
         top_level_scope->get(Word(std::get<Word>(*temp_id).token, std::get<Word>(*temp_id).lexeme));

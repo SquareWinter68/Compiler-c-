@@ -72,11 +72,18 @@ class Array{
                 return "["s + std::to_string(size) + "]" + arr->to_string();
             }
         }
-        int get_basic_type(){
-            if (std::holds_alternative<Basic_type>(type)) return std::get<Basic_type>(type).second;
+        TOKENS get_basic_type(){
+            if (std::holds_alternative<Basic_type>(type)) return std::get<Basic_type>(type).first;
             else{
                 auto arr = std::get<Array_type>(type);
                 return arr->get_basic_type();
+            }
+        }
+        int get_basic_type_width(){
+            if (std::holds_alternative<Basic_type>(type)) return std::get<Basic_type>(type).second;
+            else{
+                auto arr = std::get<Array_type>(type);
+                return arr->get_basic_type_width();
             }
         }
 };
@@ -111,13 +118,15 @@ inline bool is_bool(Type t1){
     return false;
 }
 
-inline std::string type_string_repr(Type type){
+inline std::string type_string_repr(Type type, long size = 0){
     if (std::holds_alternative<Basic_type>(type)){
         return find_string_repr(std::get<Basic_type>(type).first);
     }
     else {
         // should return to_string of an array, will handle at later time
-        return "Todo, implement array.to_string(), for this case implies giving expression as argument";
+        //return "Todo, implement array.to_string(), for this case implies giving expression as argument";
+        auto temp = std::get<Array_type>(type);
+        return find_string_repr(temp->get_basic_type()) + " [" + std::to_string(temp->size) + "]";
     }
 }
 // checks if type is in allowed types.
@@ -136,7 +145,8 @@ inline long get_type_width(const Type& type){
     }
     else{
         auto arr = std::get<Array_type>(type);
-        return arr->size * arr->get_basic_type();
+        return arr->size * arr->get_basic_type_width();
     }
 }
+
 #endif

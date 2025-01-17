@@ -4,4 +4,5 @@
 #include "intermediate.hpp"
 #include <memory>
 st_shptr program(std::shared_ptr<Lexer> lx);
+std::shared_ptr<Scope> get_scope();
 #endif
