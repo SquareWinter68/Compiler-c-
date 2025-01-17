@@ -2,16 +2,21 @@
 #include "Lexical_anal.hpp"
 #include "Tokens.hpp"
 #include "intermediate.hpp"
+#include "parse_TAC.hpp"
 #include "utils.hpp"
 #include <algorithm>
+#include <bits/std_thread.h>
 #include <cassert>
 #include <fstream>
+#include <ios>
 #include <iostream>
 #include <memory>
+#include <string>
 #include <utility>
 #include <variant>
 #include <vector>
 #include "parser.hpp"
+#include <cstdlib>
 // int main(){
 //     using std::cout;
 //     Lexer lex{"/home/squarewinter/temp/temp_compiler/test.し++"};
@@ -84,6 +89,8 @@
 
 // }
 
+using std::string_literals::operator""s;
+
 int main(){
     //std::ofstream out_file{"out.inter", std::ios::binary};
     auto lexer =  std::make_shared<Lexer>(Lexer("/home/squarewinter/temp/temp_compiler/tests/loops_test.し++"));
@@ -104,7 +111,7 @@ int main(){
     if (var) var->generate(begin, after); 
     else cout << "program contains zero statements\n";
     Statement::emit_label(after);
-    auto vec = Node::vector;
+    auto instruction_vector = Node::vector;
     auto printer_lambda = [](std::string t){cout << t;};
     cout << "Did we successfully steal the vector from Node\n";
     //std::for_each(vec.begin(), vec.end(), printer_lambda);
@@ -125,6 +132,20 @@ int main(){
         offset += get_type_width(temp->type);
     }
     std::for_each(vars.begin(), vars.end(), var_printer);
-    cout << "Printing temsp\n";
-    //std::for_each(test.begin(), test.end(), temp_printer);
+    
+    std::ofstream output_file{"し++.inter", std::ios::binary};
+    auto file_writer = [&output_file](std::string& elem){output_file << elem;};
+    std::for_each(instruction_vector.begin(), instruction_vector.end(), file_writer);
+    output_file.flush();
+    Tac_parser tac_parser{"し++.inter"};
+    //tac_parser.init("し++.inter"s);
+    //tac_parser.scan();
+    std::vector<variable_positions> varibales_;
+    std::ofstream asm_output_file{"し++.s", std::ios::binary};
+    init_tac_parser(vars, asm_output_file, &tac_parser);
+   // tac_parser.scan();
+    generate_asm(offset);
+    asm_output_file.flush();
+    std::string command{"gcc -g -o し++.out し++.s"};
+    system(command.c_str());
 }

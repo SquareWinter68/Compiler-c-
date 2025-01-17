@@ -1,0 +1,16 @@
+int test;
+ {
+    char;
+    string a = "this is a test";
+    float pi = 3.141592;
+    int meaning_of_life = 42;
+    bool is_false = false;
+    bool is_true = true;
+    pi += meaning_of_life;
+    meaning_of_life -= 10;
+    if (is_ture && is_false){
+        while(true){
+            do test;
+        }
+    }
+ }

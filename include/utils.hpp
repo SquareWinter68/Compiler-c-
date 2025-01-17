@@ -49,7 +49,7 @@ using Basic_type = std::pair<TOKENS, int>;
 using Array_type = std::shared_ptr<Array>;
 
 struct types{
-    constexpr static Basic_type INTEGER{TOKENS::INT, 4};
+    constexpr static Basic_type INTEGER{TOKENS::INT, 8};
     constexpr static Basic_type FLOAT{TOKENS::FLOAT, 8};
     constexpr static Basic_type CHAR{TOKENS::CHAR, 1};
     constexpr static Basic_type BOOL{TOKENS::BOOL, 1};

@@ -1,13 +1,27 @@
 #ifndef TAC_PARSER_HEADER
 #define TAC_PARSER_HEADER
+#include "intermediate.hpp"
 #include <any>
 #include <cctype>
+#include <concepts>
 #include <fstream>
+#include <memory>
 #include <regex>
 #include <stdexcept>
 #include <string>
 #include <utility>
 #include <vector>
+template<typename T>
+concept string_container = requires(T a){
+    {a.begin()} -> std::same_as<typename T::iterator>;
+    {a.end()} -> std::same_as<typename T::iterator>;
+    requires std::same_as<typename T::value_type, std::string>;
+};
+class Tac_parser;
+void init_tac_parser(std::vector<variable_positions>& vars, std::ofstream& out, Tac_parser* pars);
+
+void generate_asm(unsigned long long reserve);
+
 inline std::vector<std::string> empty;
 inline void parse_tac(std::vector<std::string>&, std::vector<std::string>& globals = empty){
     long long offset;
@@ -30,14 +44,27 @@ namespace stolen{
 
 
 enum class tac_tokens{
-    label, id, assign, mult, div, add, sub, jump, if_, if_false, greater_than, less_than, greater_than_equal, less_than_equal, equal, square_bracket_open, square_bracket_closed, eof_tok, const_
+    label, id, assign, mult, div, add, sub, jump, if_, if_false, greater_than, less_than, greater_than_equal, less_than_equal, equal,not_equal, square_bracket_open, square_bracket_closed, eof_tok, const_
 };
 
 class Tac_parser{
     public:
-        Tac_parser(){}
+        Tac_parser(std::string filename){
+            file.open(filename);
+            if (!file.is_open()) throw std::runtime_error{"Failed to open file in parse_TAC.cpp\n"};
+            // initialize the peek
+            do get_next_char(); while(peek == 0);
+        }
         char peek{};
         std::ifstream file; 
+        // template<typename T>
+        // requires std::same_as<T, std::string>
+        // void init(T&& file_name){
+        //     file.open(file_name);
+        //     if (!file.is_open()) throw std::runtime_error{"Failed to open file in parse_TAC.cpp\n"};
+        //     // initialize the peek
+        //     do get_next_char(); while(peek == 0);
+        // }
         void get_next_char(){
             file.get(peek);
         }
@@ -47,7 +74,7 @@ class Tac_parser{
             return false;
         }
     std::pair<tac_tokens, std::any> scan(){
-         if (!peek) throw std::runtime_error{"Peek not initialized\n"};
+        if (!peek) throw std::runtime_error{"Peek not initialized\n"};
         for (;; get_next_char()){
             if (file.eof()) return {tac_tokens::eof_tok, 0};
             // handle the first read from file
