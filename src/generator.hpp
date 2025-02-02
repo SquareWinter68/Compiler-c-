@@ -19,4 +19,5 @@ void iffalse_id_op_id(tac_tokens operator_, variable_positions operand_1, variab
 void iffalse_id_op_const(tac_tokens operator_, variable_positions operand_1, long operand_2, std::string& label, std::ofstream* out);
 void iffalse_const_op_id(tac_tokens operator_, long operand_1, variable_positions operand_2, std::string& label, std::ofstream* out);
 void id_eq_id(variable_positions operand_1, variable_positions operand_2, std::ofstream* out);
+void id_indexed_by_id_eq_const(variable_positions start, variable_positions offset, long value, std::ofstream* out);
 #endif

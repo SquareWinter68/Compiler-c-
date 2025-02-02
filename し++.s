@@ -9,7 +9,7 @@ main:
 L1:
 	movq $1, 0(%rsp)
 L3:
-	movq $5, 8(%rsp)
+	movq $12, 8(%rsp)
 L4:
 	movq 8(%rsp), %rax
 	cmp $0, %rax

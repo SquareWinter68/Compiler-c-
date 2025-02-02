@@ -186,6 +186,8 @@ void parse_line(){
                     }else if(lookahaed_tac.first == tac_tokens::const_){
                         //id[id]=const
                         const1=std::any_cast<long>(lookahaed_tac.second);
+                        move_tac();
+                        id_indexed_by_id_eq_const(get_variable_pos(id_1), get_variable_pos(id2), const1, get_output_file());
                         //mrzi meee
                     }
                 }

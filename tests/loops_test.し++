@@ -12,10 +12,14 @@
     //    i = 0;
     //}
     int result; int x;
-    result = 1; x = 5;
+    result = 1; x = 12;
     while (x > 0){
         result = result*x;
         x = x-1;
     }
+    //int[100] a;
+    //int b;
+    //b = 0;
+    //a[b] = 42;
 }
 //int main(int test, int hello)

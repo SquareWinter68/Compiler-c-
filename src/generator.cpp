@@ -65,7 +65,7 @@ void id_eq_id_indexec_by_id(variable_positions location, variable_positions star
 void id_index_by_id_eq_id(variable_positions start, variable_positions offset, variable_positions location, std::ofstream* out){
     *out << "\tmovq " << location.offset << "(%rsp), %rax\n";
     *out << "\tmovq " << start.offset << "(%rsp), %rdi\n";
-    *out << "\taddq " << offset.offset << "(%rsp), %rsi\n";
+    *out << "\tmovq " << offset.offset << "(%rsp), %rsi\n";
     *out << "\tmovq %rax, " << "(%rdi,%rsi)\n"; 
 }
 
@@ -154,6 +154,13 @@ void id_eq_id(variable_positions operand_1, variable_positions operand_2, std::o
     // operand 1= operand2
     *out << "\tmovq " << operand_2.offset << "(%rsp), %rax\n";
     *out << "\tmovq %rax, " << operand_1.offset << "(%rsp)\n"; 
+}
+
+void id_indexed_by_id_eq_const(variable_positions start, variable_positions offset, long value, std::ofstream* out){
+    *out << "\tmovq $" << value << ", %rax\n";
+    *out << "\tmovq " << start.offset << "(%rsp), %rdi\n";
+    *out << "\tmovq " << offset.offset << "(%rsp), %rsi\n";
+    *out << "\tmovq %rax, " << "(%rdi,%rsi)\n"; 
 }
 // int main(){
 //     std::ofstream file{"test.txt", std::ios::binary};
